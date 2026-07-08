@@ -1,19 +1,24 @@
 ---
 import { categories, getCategory, type CategorySlug } from '../data/posts';
 
-const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
+// 去掉 BASE 前缀再做路径分段，便于与下方不带 BASE 的标签对比
+const pathname = Astro.url.pathname.replace(BASE, '/').replace(/\/+$/, '') || '/';
 const segments = pathname.split('/').filter(Boolean);
 
 const links: Array<{ href: string; label: string }> = [
-  ...categories.map(c => ({ href: `/blog/${c.slug}/`, label: c.label })),
-  { href: '/about/', label: '关于' },
+  ...categories.map(c => ({ href: `${BASE}blog/${c.slug}/`, label: c.label })),
+  { href: `${BASE}about/`, label: '关于' },
 ];
 
 function isActive(href: string): boolean {
-  if (href === '/about/') return pathname === '/about';
+  // href 已含 BASE，pathname 也含 BASE，做归一化比对
+  const norm = (s: string) => s.replace(/\/+$/, '') || '/';
+  const target = href.replace(BASE, '/');
+  if (target === '/about/') return norm(pathname) === '/about';
   if (segments[0] === 'blog' && segments[1]) {
     const activeCat = getCategory(segments[1] as CategorySlug);
-    return activeCat !== undefined && `/blog/${activeCat.slug}/` === href;
+    return activeCat !== undefined && `/blog/${activeCat.slug}/` === target;
   }
   return false;
 }
@@ -43,7 +48,7 @@ function isActive(href: string): boolean {
       </span>
     </button>
 
-    <a class="nav__brand" href="/" aria-label="home">Exist</a>
+    <a class="nav__brand" href={BASE} aria-label="home">Exist</a>
 
     <ul class="nav__list">
       {links.map(l => (

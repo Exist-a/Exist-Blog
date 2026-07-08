@@ -3,6 +3,7 @@ import BlogLayout from '../../layouts/BlogLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { allPostSummaries, postsSortedDesc } from '../../data/posts';
 
+const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 const posts = postsSortedDesc(await allPostSummaries());
 ---
 
@@ -19,7 +20,7 @@ const posts = postsSortedDesc(await allPostSummaries());
       <li>
         <PostCard
           post={post}
-          href={`/blog/${post.category}/${post.slug}/`}
+          href={`${BASE}blog/${post.category}/${post.slug}/`}
         />
       </li>
     ))}

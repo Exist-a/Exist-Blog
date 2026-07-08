@@ -12,7 +12,7 @@ import PageHeader from '../components/PageHeader.astro';
 
     <section class="about__intro">
       <img
-        src="/avatar.jpg"
+        src={`${(import.meta.env.BASE_URL || '/').replace(/\/?$/, '/')}avatar.jpg`}
         alt="Exist 头像"
         class="about__avatar"
         width="140"

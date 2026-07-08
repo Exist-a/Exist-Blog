@@ -20,6 +20,7 @@ interface PageProps {
 }
 const { category } = Astro.props as PageProps;
 const cat = categories.find(c => c.slug === category)!;
+const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 const posts = postsSortedDesc(await postsByCategory(category));
 ---
 
@@ -35,7 +36,7 @@ const posts = postsSortedDesc(await postsByCategory(category));
       <li>
         <PostCard
           post={post}
-          href={`/blog/${category}/${post.slug}/`}
+          href={`${BASE}blog/${category}/${post.slug}/`}
         />
       </li>
     ))}
