@@ -1,5 +1,6 @@
 ---
 import BlogLayout from '../../../layouts/BlogLayout.astro';
+import Comments from '../../../components/Comments.astro';
 import {
   categories,
   allPosts,
@@ -37,24 +38,31 @@ const formatted = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
   description={post.excerpt}
   eyebrow={`${cat.label}${sub ? ` · ${sub.label}` : ''} · ${formatted}`}
   pageTitle={post.title}
+  category={category}
+  activeTag={post.tags[0]}
 >
   <article class="post">
     <p class="post__excerpt lead">{post.excerpt}</p>
     <hr class="rule" />
 
     <div class="post__body">
-      <p class="post__placeholder">
-        本文正文将在 P3 阶段从 <code>src/content/posts/{post.slug}.md</code> 加载。
-      </p>
-      <p class="post__placeholder muted">
-        目前是占位页面 —— 仅渲染 frontmatter（标题 / 日期 / 摘要）。
-      </p>
+      {post.body ? (
+        <div class="post__content" set:html={post.body} />
+      ) : (
+        <>
+          <p class="post__placeholder muted">
+            本文正文待补充。
+          </p>
+        </>
+      )}
     </div>
 
     <p class="post__back">
       <a href={`/blog/${category}/`}>← 返回 {cat.label}</a>
     </p>
   </article>
+
+  <Comments />
 </BlogLayout>
 
 <style>
@@ -63,21 +71,63 @@ const formatted = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
   }
   .post__body {
     margin: 2rem 0;
-    padding: 1.5rem 0;
   }
   .post__placeholder {
     color: var(--text-soft);
     line-height: 1.7;
     margin: 0 0 0.75rem 0;
   }
-  .post__placeholder code {
+
+  /* ── 文章正文排版 ── */
+  .post__content { color: var(--text); line-height: 1.75; }
+  .post__content > * + * { margin-top: 1.25rem; }
+  .post__content p { color: var(--text-soft); }
+  .post__content h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.375rem;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    margin-top: 2.5rem !important;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--ink-line);
+  }
+  .post__content h2:first-child { border-top: 0; padding-top: 0; }
+  .post__content strong { color: var(--text); font-weight: 600; }
+  .post__content code {
     font-family: var(--font-mono);
-    font-size: 0.85em;
+    font-size: 0.875em;
     color: var(--accent);
     background: var(--ink-soft);
     padding: 0.1em 0.4em;
     border-radius: 2px;
   }
+  .post__content pre {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    background: var(--ink-soft);
+    border: 1px solid var(--ink-line);
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+  .post__content pre code {
+    background: transparent;
+    padding: 0;
+    color: var(--text);
+    font-size: inherit;
+  }
+  .post__content ol,
+  .post__content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    color: var(--text-soft);
+  }
+  .post__content ol li,
+  .post__content ul li { margin: 0.5rem 0; line-height: 1.7; }
+  .post__content ol li::marker { color: var(--accent); font-family: var(--font-mono); }
+
   .post__back {
     margin-top: 2.5rem;
     padding-top: 1.5rem;

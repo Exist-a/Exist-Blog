@@ -13,6 +13,7 @@ export interface Post {
   excerpt: string;
   category: CategorySlug;
   tags: SubcategorySlug[];   // 一篇文章通常归属 1 个 tag
+  body?: string;             // 可选 HTML 正文；未填则文章页只显示 frontmatter
 }
 
 /* ── 一级分类 ─────────────────────────────────────────── */
@@ -25,13 +26,6 @@ export const categories = [
 ] as const;
 
 export type CategorySlug = typeof categories[number]['slug'];
-
-export const categoryDescriptions: Record<CategorySlug, string> = {
-  frontend: 'React / Next.js / CSS / 浏览器 —— 我从写 div 那天起就在学的领域。',
-  backend:  'Go / Node.js / API 设计 —— 把前端不能解决的问题搬到这里。',
-  database: 'PostgreSQL / MySQL —— 不只是写 SQL，是索引、隔离级别和连接池。',
-  ai:       'RAG / Agent / LLM —— 现在做的事。',
-};
 
 /* ── 二级 tag ─────────────────────────────────────────── */
 
@@ -63,75 +57,72 @@ export type SubcategorySlug =
 /* ── 文章 ─────────────────────────────────────────────── */
 
 export const allPosts: Post[] = [
-  // ── 前端 ──
-  { slug: 'react-server-components-deep-dive',
-    title: 'React Server Components：从请求到流的完整链路',
-    date: '2026-07-02',
-    excerpt: 'RSC 不是渲染优化，是一种新的架构边界。把 server / client 拆开后，水合成本、网络瀑布、缓存策略都变了。',
-    category: 'frontend', tags: ['react'] },
+  {
+    slug: 'react-useeffect-closure',
+    title: 'React useEffect 的闭包陷阱：为什么 state 总是旧的',
+    date: '2026-07-08',
+    excerpt: 'useEffect 的依赖数组不会"重新绑定"已经声明的回调里的 state。如果你在 setInterval / 事件监听里读到的永远是初始值，这一篇把根因和三种修法讲清楚。',
+    category: 'frontend',
+    tags: ['react'],
+    body: `
+<p>这是一个几乎每个写过 React 的人都会踩一次的坑：你写了一个 <code>setInterval</code>，想在回调里读最新的 state，但它永远打印初始值。</p>
 
-  { slug: 'css-container-queries-real-use',
-    title: 'Container Queries 在真实项目里到底怎么用',
-    date: '2026-06-28',
-    excerpt: 'media query 问的是视口，container query 问的是父容器。后者终于让"组件真正可复用"成为可能。',
-    category: 'frontend', tags: ['css'] },
+<h2>问题复现</h2>
 
-  { slug: 'nextjs-app-router-tradeoffs',
-    title: 'Next.js App Router 的取舍：一年后回头看',
-    date: '2026-06-15',
-    excerpt: '从 Pages Router 迁到 App Router 一年了。streaming、server actions、嵌套 layout 都好用，但有些坑藏得很深。',
-    category: 'frontend', tags: ['nextjs'] },
+<pre><code>function Counter() {
+  const [count, setCount] = useState(0);
 
-  // ── 后端 ──
-  { slug: 'go-context-cancellation',
-    title: 'Go 的 context 取消传播：一张图看懂',
-    date: '2026-06-30',
-    excerpt: 'context 不是参数，是"取消信号 + 截止时间 + 值传递"的三合一。写错过的人都栽在同一处。',
-    category: 'backend', tags: ['go'] },
+  useEffect(() =&gt; {
+    const id = setInterval(() =&gt; {
+      console.log(count); // 永远打印 0
+    }, 1000);
+    return () =&gt; clearInterval(id);
+  }, []); // 空依赖：effect 只在挂载时跑一次
 
-  { slug: 'rest-vs-graphql-vs-trpc',
-    title: 'REST vs GraphQL vs tRPC：2026 年的选型',
-    date: '2026-06-10',
-    excerpt: '三个都不是银弹。中小项目用 tRPC 提速明显，但当团队 / BFF / 跨端都进来，REST 的简单反而赢。',
-    category: 'backend', tags: ['api'] },
+  return &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;{count}&lt;/button&gt;
+}</code></pre>
 
-  { slug: 'postgres-connection-pool-pitfalls',
-    title: 'Postgres 连接池：pgbouncer 在事务模式下踩过的坑',
-    date: '2026-05-22',
-    excerpt: '事务模式、session 模式、statement 模式 —— 三种模式的 prepared statement 行为完全不同。',
-    category: 'backend', tags: ['pg-perf'] },
+<p>点按钮，<code>count</code> 明明变了。但控制台始终打印 <code>0</code>。</p>
 
-  // ── 数据库 ──
-  { slug: 'postgres-index-types',
-    title: 'Postgres 索引全家桶：B-tree / Hash / GIN / BRIN',
-    date: '2026-06-25',
-    excerpt: 'B-tree 之外还有三个常用索引。GIN 给数组和 jsonb，BRIN 给时序数据，省 90% 空间。',
-    category: 'database', tags: ['postgres'] },
+<h2>为什么</h2>
 
-  { slug: 'mysql-isolation-levels',
-    title: 'MySQL 隔离级别：从脏读到幻读的真实代价',
-    date: '2026-06-08',
-    excerpt: 'RR 不是"绝对安全"，是"够用"。很多团队不知道快照读和当前读的区别，写出看似正确其实会脏写的代码。',
-    category: 'database', tags: ['mysql'] },
+<p><code>useEffect</code> 的依赖数组决定的是"什么时候重新执行 effect"，不是"什么时候重新读取闭包变量"。</p>
 
-  // ── AI ──
-  { slug: 'rag-from-scratch',
-    title: 'RAG 不是"塞进向量数据库就完事"',
-    date: '2026-07-01',
-    excerpt: 'chunk 切分、embedding 选型、rerank、query rewrite —— 真实项目里这四步每一步都能把效果拉一档。',
-    category: 'ai', tags: ['rag'] },
+<p>第一次渲染时，effect 跑了一次，把当时的 <code>count</code>（也就是 <code>0</code>）闭包进了 <code>setInterval</code> 的回调里。之后 <code>count</code> 变了，但闭包里那份引用没变 —— 回调每次读的还是当初那个 <code>0</code>。</p>
 
-  { slug: 'function-calling-vs-mcp',
-    title: 'Function Calling vs MCP：什么时候该用哪个',
-    date: '2026-06-20',
-    excerpt: 'function calling 是"模型调用工具"，MCP 是"工具的标准协议"。短期看是替代关系，长期看是互补。',
-    category: 'ai', tags: ['agent'] },
+<p>依赖数组是 <code>[]</code>，effect 不再执行。React 也不会"穿透"回去更新那个已经创建的闭包。</p>
 
-  { slug: 'token-economics',
-    title: '大模型的 token 经济：为什么你的账单总是超预期',
-    date: '2026-06-05',
-    excerpt: 'input / output 价格差 5 倍，cache hit 便宜 10 倍，thinking token 还要单独算。一篇把账算清楚。',
-    category: 'ai', tags: ['llm'] },
+<h2>三种修法</h2>
+
+<ol>
+<li><strong>把依赖加上</strong>。最简单，但要小心：依赖变化会让 effect 反复 cleanup/setup，<code>setInterval</code> 会不停重启。</li>
+<li><strong>用 ref 存最新值</strong>。ref 的 <code>.current</code> 是可变容器，effect 依赖它但不会触发重新执行；回调里读 <code>countRef.current</code> 总是最新的。</li>
+<li><strong>用函数式 setState</strong>。如果只是想基于上一次的值更新，<code>setCount(c =&gt; c + 1)</code> 永远拿到最新值，不需要把 <code>count</code> 读进闭包。</li>
+</ol>
+
+<h2>ref 写法参考</h2>
+
+<pre><code>function Counter() {
+  const [count, setCount] = useState(0);
+  const countRef = useRef(count);
+
+  useEffect(() =&gt; {
+    countRef.current = count; // 每次渲染后同步
+  });
+
+  useEffect(() =&gt; {
+    const id = setInterval(() =&gt; {
+      console.log(countRef.current); // 永远是最新的
+    }, 1000);
+    return () =&gt; clearInterval(id);
+  }, []);
+
+  return &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;{count}&lt;/button&gt;
+}</code></pre>
+
+<p>核心就一句话：闭包捕获的是变量名，不是变量的值。要么让 effect 重跑（依赖数组），要么换一种方式读最新值（ref / 函数式更新），不能既不让它重跑、又指望它读新值。</p>
+`,
+  },
 ];
 
 /* ── 查询辅助 ─────────────────────────────────────────── */

@@ -3,7 +3,6 @@ import BlogLayout from '../../layouts/BlogLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import {
   categories,
-  categoryDescriptions,
   postsByCategory,
   postsSortedDesc,
   type CategorySlug,
@@ -26,11 +25,10 @@ const posts = postsSortedDesc(postsByCategory(category));
 
 <BlogLayout
   title={`${cat.label}笔记 · Exist`}
-  description={categoryDescriptions[category]}
   eyebrow={`category · ${category}`}
   pageTitle={cat.label}
   count={posts.length}
-  pageDescription={categoryDescriptions[category]}
+  category={category}
 >
   <ul class="post-list">
     {posts.map(post => (

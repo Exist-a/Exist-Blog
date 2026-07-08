@@ -48,17 +48,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     gap: clamp(2rem, 5vw, 3.5rem);
   }
 
-  /* 圆形包边：外圈是白色描边 + 阴影，内圈是头像 */
+  /* 圆形包边：外圈描边 + 阴影，内圈是头像 */
   .hero__avatar-frame {
     flex: 0 0 auto;
     width: clamp(200px, 26vw, 280px);
     height: clamp(200px, 26vw, 280px);
     border-radius: 50%;
-    padding: 0;                       /* 头像贴紧描边 */
+    padding: 0;
     background: transparent;
     box-shadow:
-      0 0 0 2px #ffffff,              /* 外圈白色细环，紧贴头像 */
-      0 10px 40px rgba(0, 0, 0, 0.5); /* 立体感 */
+      0 0 0 2px var(--avatar-ring),
+      0 10px 40px rgba(var(--shadow-color), 0.35);
   }
   .hero__avatar {
     display: block;

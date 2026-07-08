@@ -1,0 +1,291 @@
+---
+/**
+ * 评论区：用 Giscus（基于 GitHub Discussions）
+ *
+ * 支持：嵌套回复 + 表情 reaction（👍 ❤ 等充当"点赞"）+ GitHub 登录
+ *
+ * ── 启用方法（替换下方四个常量后即生效） ───────────────
+ *   repo       → 你的 GitHub 公开仓库
+ *   repoId     → giscus.app 给的 ID
+ *   category   → Discussions 里的分类名
+ *   categoryId → giscus.app 给的 ID
+ *
+ *   详细步骤见下方占位卡片里的"启用评论"区块。
+ */
+
+const repo       = 'Exist-a/exist-blog';   // ← 改成你的 repo
+const repoId     = 'R_PLACEHOLDER';        // ← giscus.app 给的 ID
+const category   = 'Announcements';        // ← Discussions 分类名
+const categoryId = 'DIC_PLACEHOLDER';      // ← giscus.app 给的 ID
+
+const isConfigured = !repoId.startsWith('R_PLACEHOLDER')
+                  && !categoryId.startsWith('DIC_PLACEHOLDER');
+
+// 配置没填时展示的 mock 评论预览 —— 真实接入后这块会被 Giscus iframe 取代
+const mockComments = [
+  {
+    user: 'github-user',
+    initial: 'G',
+    date: '2 天前',
+    text: '用 GitHub 登录后即可评论。支持嵌套回复 + 表情反应（👍 ❤ 等即点赞）。',
+  },
+  {
+    user: 'another-dev',
+    initial: 'A',
+    date: '5 天前',
+    text: 'setInterval 这段讲得清楚，之前确实踩过这个坑。',
+  },
+];
+---
+
+<section class="comments">
+  <p class="comments__title mono">评论</p>
+
+  {isConfigured ? (
+    <script
+      src="https://giscus.app/client.js"
+      data-repo={repo}
+      data-repo-id={repoId}
+      data-category={category}
+      data-category-id={categoryId}
+      data-mapping="pathname"
+      data-strict="0"
+      data-reactions-enabled="1"
+      data-emit-metadata="0"
+      data-input-position="top"
+      data-theme="preferred_color_scheme"
+      data-lang="zh-CN"
+      data-loading="lazy"
+      crossorigin="anonymous"
+      async
+    ></script>
+  ) : (
+    <div class="comments__panel">
+      <!-- 预览：让用户看到"评论接入后长什么样" -->
+      <div class="comments__preview" aria-hidden="true">
+        {mockComments.map(c => (
+          <div class="comment">
+            <div class="comment__avatar">{c.initial}</div>
+            <div class="comment__body">
+              <div class="comment__head">
+                <span class="comment__name">{c.user}</span>
+                <span class="comment__date mono">{c.date}</span>
+              </div>
+              <p class="comment__text">{c.text}</p>
+              <div class="comment__actions">
+                <button type="button" class="comment__reaction">👍 3</button>
+                <button type="button" class="comment__reaction">❤ 1</button>
+                <button type="button" class="comment__reply">↩ 回复</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- 启用步骤 -->
+      <div class="comments__setup">
+        <p class="comments__setup-eyebrow mono">配置 Giscus 后即生效</p>
+        <ol class="comments__steps">
+          <li>
+            <span class="comments__step-num mono">01</span>
+            <div>
+              <p class="comments__step-title">开启 Discussions</p>
+              <p class="comments__step-desc">GitHub repo → Settings → General → 勾选 <strong>Discussions</strong>。</p>
+            </div>
+          </li>
+          <li>
+            <span class="comments__step-num mono">02</span>
+            <div>
+              <p class="comments__step-title">安装 Giscus app</p>
+              <p class="comments__step-desc">访问 <a href="https://github.com/apps/giscus" target="_blank" rel="noopener">github.com/apps/giscus</a> → Install → 选你的 repo。</p>
+            </div>
+          </li>
+          <li>
+            <span class="comments__step-num mono">03</span>
+            <div>
+              <p class="comments__step-title">拿 repoId / categoryId</p>
+              <p class="comments__step-desc">打开 <a href={`https://giscus.app/zh-CN?repo=${repo}&category=${category}`} target="_blank" rel="noopener">giscus.app</a> 填好 repo → 复制生成的 <code>data-repo-id</code> 和 <code>data-category-id</code>。</p>
+            </div>
+          </li>
+          <li>
+            <span class="comments__step-num mono">04</span>
+            <div>
+              <p class="comments__step-title">填回本组件顶部</p>
+              <p class="comments__step-desc">把 <code>repoId</code> / <code>categoryId</code> 替换掉 <code>R_PLACEHOLDER</code> / <code>DIC_PLACEHOLDER</code>，重新构建即可。</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  )}
+</section>
+
+<style>
+  .comments {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--ink-line);
+  }
+  .comments__title {
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin: 0 0 1.5rem 0;
+    font-weight: 500;
+  }
+
+  /* ── 占位面板 ── */
+  .comments__panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  /* ── Mock 评论列表 ── */
+  .comments__preview {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    opacity: 0.85;        /* 略淡，提示这是预览 */
+  }
+
+  .comment {
+    display: flex;
+    gap: 0.875rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--ink-line);
+  }
+  .comment:last-child { border-bottom: 1px solid var(--ink-line); }
+
+  .comment__avatar {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    border: 1px solid var(--ink-line);
+    color: var(--text-mute);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+
+  .comment__body { flex: 1 1 auto; min-width: 0; }
+  .comment__head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .comment__name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .comment__date {
+    font-size: 0.6875rem;
+    color: var(--text-mute);
+  }
+  .comment__text {
+    font-size: 0.9375rem;
+    color: var(--text-soft);
+    line-height: 1.65;
+  }
+  .comment__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .comment__reaction,
+  .comment__reply {
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    color: var(--text-mute);
+    background: var(--ink-soft);
+    border: 1px solid var(--ink-line);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .comment__reaction:hover,
+  .comment__reply:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ── 启用步骤 ── */
+  .comments__setup {
+    padding: 1.5rem;
+    background: var(--ink-soft);
+    border: 1px solid var(--ink-line);
+    border-radius: 4px;
+  }
+  .comments__setup-eyebrow {
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.25rem 0;
+    font-weight: 500;
+  }
+  .comments__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    counter-reset: step;
+  }
+  .comments__steps li {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .comments__step-num {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6875rem;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    font-weight: 500;
+  }
+  .comments__step-title {
+    font-size: 0.9375rem;
+    color: var(--text);
+    margin: 0 0 0.25rem 0;
+    font-weight: 500;
+  }
+  .comments__step-desc {
+    font-size: 0.8125rem;
+    color: var(--text-soft);
+    line-height: 1.65;
+    margin: 0;
+  }
+  .comments__step-desc a { color: var(--accent); }
+  .comments__step-desc code {
+    font-family: var(--font-mono);
+    font-size: 0.8125em;
+    color: var(--accent);
+    background: var(--ink);
+    padding: 0.05em 0.3em;
+    border-radius: 2px;
+    border: 1px solid var(--ink-line);
+  }
+
+  /* 窄屏：步骤排版保持原样 */
+  @media (max-width: 640px) {
+    .comment { padding: 0.75rem 0; }
+    .comment__avatar { width: 32px; height: 32px; font-size: 0.8125rem; }
+  }
+</style>

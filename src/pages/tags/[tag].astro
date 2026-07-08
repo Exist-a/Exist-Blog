@@ -41,6 +41,8 @@ const posts = postsSortedDesc(postsByTag(tagSlug));
   pageTitle={`#${tagLabel}`}
   count={posts.length}
   pageDescription={`关于 ${tagLabel} 的笔记，按时间倒序。`}
+  category={tagCategory}
+  activeTag={tagSlug}
 >
   <ul class="post-list">
     {posts.map(post => (

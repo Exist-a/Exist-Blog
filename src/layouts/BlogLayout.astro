@@ -2,6 +2,11 @@
 import BaseLayout from './BaseLayout.astro';
 import Sidebar from '../components/Sidebar.astro';
 import PageHeader from '../components/PageHeader.astro';
+import {
+  getCategory,
+  getSubcategory,
+  type CategorySlug,
+} from '../data/posts';
 
 interface Props {
   title?: string;
@@ -10,6 +15,10 @@ interface Props {
   pageTitle?: string;
   pageDescription?: string;
   count?: number;
+  /** 当前一级分类 → 决定侧栏展示哪些二级目录 */
+  category?: CategorySlug;
+  /** 当前激活的二级 tag → 其抽屉自动展开 */
+  activeTag?: string;
 }
 
 const {
@@ -19,12 +28,33 @@ const {
   pageTitle,
   pageDescription,
   count,
+  category,
+  activeTag,
 } = Astro.props;
+
+// 兜底：props 没传时从 URL 推断（兼容 /tags/[tag]/ 与裸路径访问）
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const segs = pathname.split('/').filter(Boolean);
+
+let layoutCat: CategorySlug | undefined = category;
+let layoutActive: string | undefined = activeTag;
+
+if (!layoutCat) {
+  if (segs[0] === 'blog' && segs[1]) {
+    layoutCat = getCategory(segs[1] as CategorySlug)?.slug;
+  } else if (segs[0] === 'tags' && segs[1]) {
+    const sub = getSubcategory(segs[1]);
+    if (sub) layoutCat = sub.category;
+  }
+}
+const hasSidebar = !!layoutCat;
 ---
 
 <BaseLayout title={title} description={description}>
-  <div class="blog-layout">
-    <Sidebar />
+  <div class:list={['blog-layout', { 'has-sidebar': hasSidebar }]}>
+    {hasSidebar && (
+      <Sidebar category={layoutCat} activeTag={layoutActive} />
+    )}
     <div class="blog-layout__main">
       {(pageTitle || eyebrow) && (
         <PageHeader
@@ -42,14 +72,16 @@ const {
 <style>
   .blog-layout {
     display: grid;
-    /* 侧栏贴左 → 不再走 max-width 居中容器，grid 横向铺开 */
-    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-columns: 240px minmax(0, 1fr);
     column-gap: 4rem;
     padding: 2.5rem var(--page-pad-x);
   }
+  /* 没有侧栏时（如 /blog/）塌缩为单列，主区撑满 */
+  .blog-layout:not(.has-sidebar) {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .blog-layout__main {
     min-width: 0; /* 防止 grid 子项溢出 */
-    /* 限制阅读宽度，避免大屏下文字太宽难读 */
     max-width: 760px;
   }
 

@@ -1,26 +1,50 @@
 ---
-const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+import { categories, getCategory, type CategorySlug } from '../data/posts';
 
-// 顶层只放最关键的两条入口：
-// - 笔记 → 进入 /blog/（侧边栏承担分类/子分类导航）
-// - 关于 → /about/
-// 一级分类不在顶部导航里铺开，避免和侧边栏重复、信息密度过高
-const links = [
-  { href: '/blog/',  label: '笔记'      },
-  { href: '/about/', label: '关于作者'  },
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const segments = pathname.split('/').filter(Boolean);
+
+const links: Array<{ href: string; label: string }> = [
+  ...categories.map(c => ({ href: `/blog/${c.slug}/`, label: c.label })),
+  { href: '/about/', label: '关于' },
 ];
 
-function isActive(href: string) {
-  if (href === '/blog/') {
-    return pathname === '/blog' || pathname.startsWith('/blog');
+function isActive(href: string): boolean {
+  if (href === '/about/') return pathname === '/about';
+  if (segments[0] === 'blog' && segments[1]) {
+    const activeCat = getCategory(segments[1] as CategorySlug);
+    return activeCat !== undefined && `/blog/${activeCat.slug}/` === href;
   }
-  return pathname === href;
+  return false;
 }
 ---
 
 <nav class="nav">
   <div class="nav__inner">
+    <button
+      type="button"
+      class="theme-switch"
+      role="switch"
+      aria-label="切换主题"
+      title="切换主题"
+      aria-checked="false"
+      data-theme-toggle
+    >
+      <span class="theme-switch__track">
+        <span class="theme-switch__thumb">
+          <svg class="theme-switch__icon theme-switch__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+          <svg class="theme-switch__icon theme-switch__icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </span>
+      </span>
+    </button>
+
     <a class="nav__brand" href="/" aria-label="home">Exist</a>
+
     <ul class="nav__list">
       {links.map(l => (
         <li>
@@ -34,6 +58,26 @@ function isActive(href: string) {
   </div>
 </nav>
 
+<script>
+  // 主题切换：click → 翻转 data-theme + 写 localStorage + 更新 aria-checked
+  const syncAria = () => {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(btn => {
+      btn.setAttribute('aria-checked', String(dark));
+    });
+  };
+  syncAria();
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch {}
+      syncAria();
+    });
+  });
+</script>
+
 <style>
   .nav {
     position: sticky;
@@ -41,13 +85,13 @@ function isActive(href: string) {
     z-index: 10;
     background: var(--ink);
     border-bottom: 1px solid var(--ink-line);
+    transition: background-color 200ms ease, border-color 200ms ease;
   }
   .nav__inner {
     width: 100%;
     padding: 1.25rem var(--page-pad-x);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1.5rem;
   }
   .nav__brand {
@@ -60,11 +104,12 @@ function isActive(href: string) {
   }
   .nav__brand:hover { color: var(--accent); }
 
+  /* 链接组被推到最右，switch 保持最左 */
   .nav__list {
     display: flex;
     gap: 1.5rem;
     list-style: none;
-    margin: 0;
+    margin: 0 0 0 auto;     /* ← 关键：margin-left:auto 把整组推到右边 */
     padding: 0;
     flex-wrap: wrap;
   }
@@ -76,12 +121,73 @@ function isActive(href: string) {
   .nav__link:hover { color: var(--text); }
   .nav__link.is-active { color: var(--accent); }
 
+  /* ── Theme Switch ───────────────────────────────────── */
+  .theme-switch {
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    line-height: 0;
+  }
+  .theme-switch:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 999px;
+  }
+
+  .theme-switch__track {
+    position: relative;
+    display: block;
+    width: 56px;
+    height: 28px;
+    background: var(--ink-soft);
+    border: 1px solid var(--ink-line);
+    border-radius: 999px;
+    transition: background 200ms ease, border-color 200ms ease;
+  }
+  .theme-switch:hover .theme-switch__track {
+    border-color: var(--accent);
+  }
+
+  .theme-switch__thumb {
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    margin-top: -11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--text);
+    color: var(--ink);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 220ms cubic-bezier(.4,.0,.2,1), background 200ms ease, color 200ms ease;
+  }
+
+  .theme-switch__icon {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    transition: opacity 160ms ease, transform 220ms ease;
+  }
+  .theme-switch__icon--sun  { opacity: 1; transform: rotate(0); }
+  .theme-switch__icon--moon { opacity: 0; transform: rotate(-90deg); }
+
+  /* 深色模式：thumb 滑到右侧，显示月亮 */
+  :root[data-theme="dark"] .theme-switch__thumb {
+    transform: translateX(28px);
+  }
+  :root[data-theme="dark"] .theme-switch__icon--sun  { opacity: 0; transform: rotate(90deg); }
+  :root[data-theme="dark"] .theme-switch__icon--moon { opacity: 1; transform: rotate(0); }
+
   @media (max-width: 640px) {
     .nav__inner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
     }
-    .nav__list { gap: 1rem; }
+    .nav__list { gap: 1rem; margin-left: auto; }
   }
 </style>

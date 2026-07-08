@@ -1,20 +1,22 @@
 /* ============================================================
    exist-blog — global tokens & reset
-   Direction: 墨黑 + 衬线大字 + sage accent（夜里的草药书）
+   默认浅色；[data-theme="dark"] 切到墨黑模式
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
+/* ---------- Palette — LIGHT（默认） ---------- */
 :root {
-  /* Palette — dark, quiet, sage accent */
-  --ink:        #0A0B0D;
-  --ink-soft:   #14161A;
-  --ink-line:   #1F2228;
-  --text:       #E8E6E0;
-  --text-mute:  #6A6A66;
-  --text-soft:  #9A968D;
-  --accent:     #B8C4A9;   /* sage, low-saturation */
-  --accent-soft:#7A8470;
+  --ink:         #FAFAF7;
+  --ink-soft:    #F1EFE9;
+  --ink-line:    #E2DFD5;
+  --text:        #16161A;
+  --text-mute:   #8A8A82;
+  --text-soft:   #4A4A45;
+  --accent:      #6B7F58;
+  --accent-soft: #8B9B7A;
+  --avatar-ring: #FFFFFF;
+  --shadow-color: 0, 0, 0;
 
   /* Type roles */
   --font-display: 'Fraunces', Georgia, 'Songti SC', 'STSong', serif;
@@ -27,15 +29,29 @@
   --fs-lead:     1rem;
   --fs-display:  clamp(3rem, 8vw, 5.5rem);
 
-  /* Layout — wider column */
+  /* Layout */
   --page-max:    880px;
   --page-pad-x:  clamp(1.5rem, 5vw, 3rem);
 
-  /* Nav height (used by full-bleed heroes to fit one viewport) */
+  /* Nav height */
   --nav-h:       68px;
 
   /* Hairline */
   --rule:    1px solid var(--ink-line);
+}
+
+/* ---------- Palette — DARK（用户切换） ---------- */
+:root[data-theme="dark"] {
+  --ink:         #0A0B0D;
+  --ink-soft:    #14161A;
+  --ink-line:    #1F2228;
+  --text:        #E8E6E0;
+  --text-mute:   #6A6A66;
+  --text-soft:   #9A968D;
+  --accent:      #B8C4A9;
+  --accent-soft: #7A8470;
+  --avatar-ring: #FFFFFF;
+  --shadow-color: 0, 0, 0;
 }
 
 /* ---------- Reset ---------- */
@@ -49,6 +65,9 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  background: var(--ink);
+  /* 主题切换时的过渡 */
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 body {
@@ -59,6 +78,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   font-weight: 400;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 /* ---------- Type — display / heading ---------- */

@@ -17,12 +17,28 @@ const {
 <html lang="zh-Hans">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <!-- 网站图标：直接用 /avatar.jpg -->
+    <link rel="icon" href="/avatar.jpg" type="image/jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>
+
+    <!--
+      主题初始化：放在 head 顶端，避免刷新时白屏闪一下浅色再切深色
+      默认浅色；用户手动选过的写 localStorage('theme')
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var theme = saved === 'dark' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
   </head>
   <body>
     <Nav />
