@@ -1,0 +1,59 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import {
+  subcategories,
+  postsByTag,
+  postsSortedDesc,
+  type CategorySlug,
+} from '../../data/posts';
+
+export async function getStaticPaths() {
+  const paths: Array<{
+    params: { tag: string };
+    props: { tagSlug: string; tagLabel: string; tagCategory: CategorySlug };
+  }> = [];
+
+  for (const cat of Object.keys(subcategories) as CategorySlug[]) {
+    for (const sub of subcategories[cat]) {
+      paths.push({
+        params: { tag: sub.slug },
+        props: { tagSlug: sub.slug, tagLabel: sub.label, tagCategory: cat },
+      });
+    }
+  }
+  return paths;
+}
+
+interface PageProps {
+  tagSlug: string;
+  tagLabel: string;
+  tagCategory: CategorySlug;
+}
+const { tagSlug, tagLabel, tagCategory } = Astro.props as PageProps;
+const posts = postsSortedDesc(postsByTag(tagSlug));
+---
+
+<BlogLayout
+  title={`#${tagLabel} · Exist`}
+  description={`关于 ${tagLabel} 的笔记`}
+  eyebrow={`tag · ${tagCategory}`}
+  pageTitle={`#${tagLabel}`}
+  count={posts.length}
+  pageDescription={`关于 ${tagLabel} 的笔记，按时间倒序。`}
+>
+  <ul class="post-list">
+    {posts.map(post => (
+      <li>
+        <PostCard
+          post={post}
+          href={`/blog/${post.category}/${post.slug}/`}
+        />
+      </li>
+    ))}
+  </ul>
+</BlogLayout>
+
+<style>
+  .post-list { list-style: none; margin: 0; padding: 0; }
+</style>

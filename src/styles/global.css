@@ -1,0 +1,145 @@
+/* ============================================================
+   exist-blog — global tokens & reset
+   Direction: 墨黑 + 衬线大字 + sage accent（夜里的草药书）
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* Palette — dark, quiet, sage accent */
+  --ink:        #0A0B0D;
+  --ink-soft:   #14161A;
+  --ink-line:   #1F2228;
+  --text:       #E8E6E0;
+  --text-mute:  #6A6A66;
+  --text-soft:  #9A968D;
+  --accent:     #B8C4A9;   /* sage, low-saturation */
+  --accent-soft:#7A8470;
+
+  /* Type roles */
+  --font-display: 'Fraunces', Georgia, 'Songti SC', 'STSong', serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale */
+  --fs-eyebrow:  0.6875rem;
+  --fs-body:     0.9375rem;
+  --fs-lead:     1rem;
+  --fs-display:  clamp(3rem, 8vw, 5.5rem);
+
+  /* Layout — wider column */
+  --page-max:    880px;
+  --page-pad-x:  clamp(1.5rem, 5vw, 3rem);
+
+  /* Nav height (used by full-bleed heroes to fit one viewport) */
+  --nav-h:       68px;
+
+  /* Hairline */
+  --rule:    1px solid var(--ink-line);
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  min-height: 100vh;
+  font-weight: 400;
+}
+
+/* ---------- Type — display / heading ---------- */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.025em;
+  font-variation-settings: "opsz" 144;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: var(--fs-display);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--text);
+  font-variation-settings: "opsz" 144;
+}
+.display em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
+}
+
+/* ---------- Inline ---------- */
+p { margin: 0; }
+a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+a:hover { color: var(--accent); }
+a:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-mute);
+  font-weight: 500;
+}
+
+.lead {
+  font-size: var(--fs-lead);
+  color: var(--text-soft);
+  line-height: 1.55;
+  max-width: 28em;
+}
+.lead strong {
+  color: var(--text);
+  font-weight: 500;
+}
+.muted { color: var(--text-mute); }
+.mono  { font-family: var(--font-mono); }
+
+/* ---------- Hairline ---------- */
+.rule {
+  display: block;
+  height: 1px;
+  border: 0;
+  background: var(--accent);
+  width: 32px;
+  margin: 2rem 0;
+  opacity: 0.6;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (max-width: 640px) {
+  :root { --nav-h: 104px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

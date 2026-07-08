@@ -1,0 +1,88 @@
+---
+import BlogLayout from '../../../layouts/BlogLayout.astro';
+import {
+  categories,
+  allPosts,
+  getCategory,
+  getSubcategory,
+  type CategorySlug,
+  type Post,
+} from '../../../data/posts';
+
+export async function getStaticPaths() {
+  return categories.flatMap(cat =>
+    allPosts
+      .filter(p => p.category === cat.slug)
+      .map(post => ({
+        params: { category: cat.slug, slug: post.slug },
+        props: { post, category: cat.slug },
+      }))
+  );
+}
+
+interface PageProps {
+  post: Post;
+  category: CategorySlug;
+}
+const { post, category } = Astro.props as PageProps;
+const cat = getCategory(category)!;
+const sub = post.tags[0] ? getSubcategory(post.tags[0]) : undefined;
+
+const date = new Date(post.date);
+const formatted = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+---
+
+<BlogLayout
+  title={`${post.title} · Exist`}
+  description={post.excerpt}
+  eyebrow={`${cat.label}${sub ? ` · ${sub.label}` : ''} · ${formatted}`}
+  pageTitle={post.title}
+>
+  <article class="post">
+    <p class="post__excerpt lead">{post.excerpt}</p>
+    <hr class="rule" />
+
+    <div class="post__body">
+      <p class="post__placeholder">
+        本文正文将在 P3 阶段从 <code>src/content/posts/{post.slug}.md</code> 加载。
+      </p>
+      <p class="post__placeholder muted">
+        目前是占位页面 —— 仅渲染 frontmatter（标题 / 日期 / 摘要）。
+      </p>
+    </div>
+
+    <p class="post__back">
+      <a href={`/blog/${category}/`}>← 返回 {cat.label}</a>
+    </p>
+  </article>
+</BlogLayout>
+
+<style>
+  .post__excerpt {
+    margin-bottom: 1.5rem;
+  }
+  .post__body {
+    margin: 2rem 0;
+    padding: 1.5rem 0;
+  }
+  .post__placeholder {
+    color: var(--text-soft);
+    line-height: 1.7;
+    margin: 0 0 0.75rem 0;
+  }
+  .post__placeholder code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--accent);
+    background: var(--ink-soft);
+    padding: 0.1em 0.4em;
+    border-radius: 2px;
+  }
+  .post__back {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--ink-line);
+    font-size: 0.9375rem;
+  }
+  .post__back a { color: var(--accent); }
+</style>

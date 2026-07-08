@@ -1,0 +1,31 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { allPosts, postsSortedDesc } from '../../data/posts';
+
+const posts = postsSortedDesc(allPosts);
+---
+
+<BlogLayout
+  title="笔记 · Exist"
+  description="Exist 的全部笔记。"
+  eyebrow="all · 2026"
+  pageTitle="全部笔记"
+  count={posts.length}
+  pageDescription="按时间倒序。前端、后端、数据库、AI 混在一起，不分类。"
+>
+  <ul class="post-list">
+    {posts.map(post => (
+      <li>
+        <PostCard
+          post={post}
+          href={`/blog/${post.category}/${post.slug}/`}
+        />
+      </li>
+    ))}
+  </ul>
+</BlogLayout>
+
+<style>
+  .post-list { list-style: none; margin: 0; padding: 0; }
+</style>

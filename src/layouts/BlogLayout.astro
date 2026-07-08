@@ -1,0 +1,67 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  eyebrow?: string;
+  pageTitle?: string;
+  pageDescription?: string;
+  count?: number;
+}
+
+const {
+  title,
+  description,
+  eyebrow,
+  pageTitle,
+  pageDescription,
+  count,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="blog-layout">
+    <Sidebar />
+    <div class="blog-layout__main">
+      {(pageTitle || eyebrow) && (
+        <PageHeader
+          eyebrow={eyebrow}
+          title={pageTitle ?? ''}
+          description={pageDescription}
+          count={count}
+        />
+      )}
+      <slot />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .blog-layout {
+    display: grid;
+    /* 侧栏贴左 → 不再走 max-width 居中容器，grid 横向铺开 */
+    grid-template-columns: 220px minmax(0, 1fr);
+    column-gap: 4rem;
+    padding: 2.5rem var(--page-pad-x);
+  }
+  .blog-layout__main {
+    min-width: 0; /* 防止 grid 子项溢出 */
+    /* 限制阅读宽度，避免大屏下文字太宽难读 */
+    max-width: 760px;
+  }
+
+  @media (max-width: 768px) {
+    .blog-layout {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+      row-gap: 1rem;
+      padding-top: 1.5rem;
+    }
+    .blog-layout__main {
+      max-width: none;
+    }
+  }
+</style>

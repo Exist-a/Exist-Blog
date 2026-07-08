@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+const stack = [
+  { label: '前端',   items: ['React / Next.js (App Router)', 'TypeScript', 'CSS architecture'] },
+  { label: '后端',   items: ['Go (生产)', 'Node.js / tRPC', 'REST 设计'] },
+  { label: '数据库', items: ['PostgreSQL (主)', 'MySQL', 'Redis (缓存)'] },
+  { label: 'AI',     items: ['RAG 系统', 'Agent / function calling', 'Vector DB (pgvector)'] },
+];
+
+const now = [
+  '上海 / 远程，2026 暑期可入职',
+  '在做：把 Next.js + Go 的全栈项目 DecisionCourt 重写到 v2',
+  '在学：Agent 框架 / 长上下文工程',
+];
+---
+
+<BaseLayout title="关于作者 · Exist" description="关于 Exist —— 前端转 AI 全栈，正在上海找工作。">
+  <PageHeader
+    eyebrow="about"
+    title="关于作者"
+    description="前端转 AI 全栈，沪漂找工作中。"
+  />
+
+  <div class="about">
+    <img
+      src="/avatar.jpg"
+      alt="Exist 头像"
+      class="about__avatar"
+      width="140"
+      height="140"
+    />
+
+    <p class="about__hello">
+      你好，我是 <strong>Exist</strong>。
+    </p>
+
+    <p>
+      写前端 4 年，最近一年在补后端 / 数据库 / AI。
+      做过 SaaS 后台、营销落地页、低代码平台，现在主要做 AI 全栈应用。
+    </p>
+
+    <p>
+      这个博客是我的<span class="hl">「公开学习日志」</span>——
+      每周写一篇最近学到的东西，主要踩坑向。
+      不保证都对，但保证都是我亲手试过的。
+    </p>
+
+    <h2 class="about__h2">现在在做什么</h2>
+    <ul class="about__list">
+      {now.map(item => <li>{item}</li>)}
+    </ul>
+
+    <h2 class="about__h2">技术栈</h2>
+    <div class="stack">
+      {stack.map(group => (
+        <div class="stack__group">
+          <div class="stack__label mono">{group.label}</div>
+          <ul class="stack__items">
+            {group.items.map(it => <li>{it}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <h2 class="about__h2">联系我</h2>
+    <ul class="about__list">
+      <li>GitHub：<a href="https://github.com/Exist-a" target="_blank" rel="noopener">@Exist-a</a></li>
+      <li>邮箱：<a href="mailto:hi@example.com">hi@example.com</a>（占位）</li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .about__avatar {
+    display: block;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 0 2rem 0;
+    box-shadow: 0 0 0 2px #ffffff, 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .about__hello {
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .about__hello strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .about p {
+    color: var(--text-soft);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    max-width: 38em;
+  }
+  .about .hl {
+    color: var(--accent);
+  }
+
+  .about__h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.125rem;
+    color: var(--text);
+    margin: 2.5rem 0 1rem 0;
+    letter-spacing: -0.01em;
+  }
+
+  .about__list {
+    list-style: none;
+    margin: 0 0 1rem 0;
+    padding: 0;
+    color: var(--text-soft);
+    line-height: 1.8;
+  }
+
+  .stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .stack__group {
+    border-left: 2px solid var(--accent);
+    padding-left: 1rem;
+  }
+  .stack__label {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .stack__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9375rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+</style>

@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="hero__row">
+      <div class="hero__avatar-frame" aria-hidden="false">
+        <img
+          src="/avatar.jpg"
+          alt="Exist 头像"
+          class="hero__avatar"
+          width="200"
+          height="200"
+        />
+      </div>
+
+      <div class="hero__text">
+        <h1 class="display hero__title">Exist的AI全栈学习笔记</h1>
+
+        <a href="/blog/" class="hero__cta">
+          <span>翻开笔记</span>
+          <span class="hero__cta-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+
+    <p class="hero__version mono">exist · v0.1 · 2026</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    /* 精确填满导航下方的一屏，避免开屏页出现上下滑动 */
+    height: calc(100vh - var(--nav-h));
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0 var(--page-pad-x);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero__row {
+    display: flex;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  /* 圆形包边：外圈是白色描边 + 阴影，内圈是头像 */
+  .hero__avatar-frame {
+    flex: 0 0 auto;
+    width: clamp(200px, 26vw, 280px);
+    height: clamp(200px, 26vw, 280px);
+    border-radius: 50%;
+    padding: 0;                       /* 头像贴紧描边 */
+    background: transparent;
+    box-shadow:
+      0 0 0 2px #ffffff,              /* 外圈白色细环，紧贴头像 */
+      0 10px 40px rgba(0, 0, 0, 0.5); /* 立体感 */
+  }
+  .hero__avatar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .hero__text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .hero__title {
+    margin: 0;
+  }
+  .hero__cta {
+    margin-top: 2.5rem;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5em;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--accent);
+  }
+  .hero__cta-arrow {
+    transition: transform 200ms ease;
+  }
+  .hero__cta:hover {
+    color: var(--text);
+  }
+  .hero__cta:hover .hero__cta-arrow {
+    transform: translateX(4px);
+  }
+
+  .hero__version {
+    position: absolute;
+    bottom: 1.5rem;
+    left: var(--page-pad-x);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    color: var(--text-mute);
+  }
+
+  @media (max-width: 640px) {
+    .hero__row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.75rem;
+    }
+    .hero__avatar-frame {
+      width: 180px;
+      height: 180px;
+    }
+  }
+</style>

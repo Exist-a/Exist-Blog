@@ -1,0 +1,49 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import {
+  categories,
+  categoryDescriptions,
+  postsByCategory,
+  postsSortedDesc,
+  type CategorySlug,
+} from '../../data/posts';
+
+export async function getStaticPaths() {
+  return categories.map(cat => ({
+    params: { category: cat.slug },
+    props: { category: cat.slug },
+  }));
+}
+
+interface PageProps {
+  category: CategorySlug;
+}
+const { category } = Astro.props as PageProps;
+const cat = categories.find(c => c.slug === category)!;
+const posts = postsSortedDesc(postsByCategory(category));
+---
+
+<BlogLayout
+  title={`${cat.label}笔记 · Exist`}
+  description={categoryDescriptions[category]}
+  eyebrow={`category · ${category}`}
+  pageTitle={cat.label}
+  count={posts.length}
+  pageDescription={categoryDescriptions[category]}
+>
+  <ul class="post-list">
+    {posts.map(post => (
+      <li>
+        <PostCard
+          post={post}
+          href={`/blog/${category}/${post.slug}/`}
+        />
+      </li>
+    ))}
+  </ul>
+</BlogLayout>
+
+<style>
+  .post-list { list-style: none; margin: 0; padding: 0; }
+</style>

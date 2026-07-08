@@ -1,0 +1,150 @@
+---
+import {
+  categories,
+  subcategories,
+  allPosts,
+  type CategorySlug,
+} from '../data/posts';
+
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const segments = pathname.split('/').filter(Boolean);
+
+const activeCat: CategorySlug | undefined =
+  segments[0] === 'blog' ? (segments[1] as CategorySlug) : undefined;
+const activeTag: string | undefined =
+  segments[0] === 'blog' ? segments[2] : undefined;
+
+const isAllActive = pathname === '/blog' || pathname === '/blog/';
+
+function catCount(slug: CategorySlug) {
+  return allPosts.filter(p => p.category === slug).length;
+}
+function tagCount(cat: CategorySlug, tag: string) {
+  return allPosts.filter(
+    p => p.category === cat && p.tags.includes(tag as any)
+  ).length;
+}
+---
+
+<aside class="sidebar">
+  <p class="sidebar__title mono">分类</p>
+  <nav class="sidebar__nav" aria-label="文章分类">
+    <a
+      href="/blog/"
+      class:list={['sidebar__top', { 'is-active': isAllActive }]}
+    >
+      <span>全部</span>
+      <span class="sidebar__count mono">{allPosts.length}</span>
+    </a>
+
+    {categories.map(cat => (
+      <div class="sidebar__cat">
+        <a
+          href={`/blog/${cat.slug}/`}
+          class:list={[
+            'sidebar__cat-link',
+            { 'is-active': activeCat === cat.slug && !activeTag }
+          ]}
+        >
+          <span>{cat.label}</span>
+          <span class="sidebar__count mono">{catCount(cat.slug)}</span>
+        </a>
+
+        <ul class="sidebar__subs">
+          {subcategories[cat.slug].map(sub => (
+            <li>
+              <a
+                href={`/tags/${sub.slug}/`}
+                class:list={['sidebar__sub', { 'is-active': activeTag === sub.slug }]}
+              >
+                <span>{sub.label}</span>
+                <span class="sidebar__count mono">{tagCount(cat.slug, sub.slug)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</aside>
+
+<style>
+  .sidebar {
+    position: sticky;
+    top: calc(var(--nav-h) + 1.5rem);
+    align-self: start;
+  }
+  .sidebar__title {
+    font-size: 0.6875rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin: 0 0 1rem 0;
+    font-weight: 500;
+  }
+  .sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .sidebar__top,
+  .sidebar__cat-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.4rem 0;
+    color: var(--text-mute);
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    transition: color 120ms ease;
+  }
+  .sidebar__top:hover,
+  .sidebar__cat-link:hover { color: var(--text); }
+  .sidebar__top.is-active,
+  .sidebar__cat-link.is-active { color: var(--accent); }
+
+  .sidebar__count {
+    font-size: 0.6875rem;
+    color: var(--text-mute);
+  }
+  .is-active .sidebar__count { color: var(--accent-soft); }
+
+  .sidebar__subs {
+    list-style: none;
+    margin: 0.1rem 0 0.6rem 0;
+    padding: 0 0 0 0.75rem;
+    border-left: 1px solid var(--ink-line);
+  }
+  .sidebar__sub {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.25rem 0;
+    color: var(--text-mute);
+    font-size: 0.875rem;
+    transition: color 120ms ease;
+  }
+  .sidebar__sub:hover { color: var(--text); }
+  .sidebar__sub.is-active { color: var(--accent); }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      position: static;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--ink-line);
+      margin-bottom: 1rem;
+    }
+    .sidebar__nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+    .sidebar__cat {
+      /* 移动端让分类横向排，子分类挤在同一个块里 */
+      min-width: 140px;
+    }
+    .sidebar__subs {
+      margin-bottom: 0;
+    }
+  }
+</style>

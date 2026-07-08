@@ -1,0 +1,43 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  count?: number;
+  description?: string;
+}
+
+const { eyebrow, title, count, description } = Astro.props;
+---
+
+<header class="page-header">
+  {eyebrow && <p class="eyebrow page-header__eyebrow">{eyebrow}</p>}
+  <h1 class="display page-header__title">{title}</h1>
+  {count !== undefined && (
+    <p class="page-header__count mono">{count} 篇</p>
+  )}
+  {description && (
+    <p class="lead page-header__desc">{description}</p>
+  )}
+  <hr class="rule" />
+</header>
+
+<style>
+  .page-header {
+    margin-bottom: 2.5rem;
+  }
+  .page-header__eyebrow {
+    margin-bottom: 1.5rem;
+  }
+  .page-header__title {
+    margin: 0 0 0.75rem 0;
+  }
+  .page-header__count {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--text-mute);
+    margin: 0 0 1.5rem 0;
+  }
+  .page-header__desc {
+    margin-top: 1.25rem;
+  }
+</style>

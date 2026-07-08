@@ -1,0 +1,87 @@
+---
+const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
+
+// 顶层只放最关键的两条入口：
+// - 笔记 → 进入 /blog/（侧边栏承担分类/子分类导航）
+// - 关于 → /about/
+// 一级分类不在顶部导航里铺开，避免和侧边栏重复、信息密度过高
+const links = [
+  { href: '/blog/',  label: '笔记'      },
+  { href: '/about/', label: '关于作者'  },
+];
+
+function isActive(href: string) {
+  if (href === '/blog/') {
+    return pathname === '/blog' || pathname.startsWith('/blog');
+  }
+  return pathname === href;
+}
+---
+
+<nav class="nav">
+  <div class="nav__inner">
+    <a class="nav__brand" href="/" aria-label="home">Exist</a>
+    <ul class="nav__list">
+      {links.map(l => (
+        <li>
+          <a
+            href={l.href}
+            class:list={['nav__link', { 'is-active': isActive(l.href) }]}
+          >{l.label}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</nav>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--ink);
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .nav__inner {
+    width: 100%;
+    padding: 1.25rem var(--page-pad-x);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .nav__brand {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+  }
+  .nav__brand:hover { color: var(--accent); }
+
+  .nav__list {
+    display: flex;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+  .nav__link {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--text-mute);
+  }
+  .nav__link:hover { color: var(--text); }
+  .nav__link.is-active { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .nav__inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .nav__list { gap: 1rem; }
+  }
+</style>
