@@ -20,7 +20,7 @@ interface PageProps {
 }
 const { category } = Astro.props as PageProps;
 const cat = categories.find(c => c.slug === category)!;
-const posts = postsSortedDesc(postsByCategory(category));
+const posts = postsSortedDesc(await postsByCategory(category));
 ---
 
 <BlogLayout

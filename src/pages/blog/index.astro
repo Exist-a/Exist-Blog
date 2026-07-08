@@ -1,9 +1,9 @@
 ---
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import { allPosts, postsSortedDesc } from '../../data/posts';
+import { allPostSummaries, postsSortedDesc } from '../../data/posts';
 
-const posts = postsSortedDesc(allPosts);
+const posts = postsSortedDesc(await allPostSummaries());
 ---
 
 <BlogLayout
@@ -12,7 +12,7 @@ const posts = postsSortedDesc(allPosts);
   eyebrow="all · 2026"
   pageTitle="全部笔记"
   count={posts.length}
-  pageDescription="按时间倒序。前端、后端、数据库、AI 混在一起，不分类。"
+  pageDescription="全部笔记，按时间倒序。"
 >
   <ul class="post-list">
     {posts.map(post => (

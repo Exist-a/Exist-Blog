@@ -19,15 +19,15 @@
   --shadow-color: 0, 0, 0;
 
   /* Type roles */
-  --font-display: 'Fraunces', Georgia, 'Songti SC', 'STSong', serif;
-  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-display: 'LXGW WenKai', 'LXGW WenKai Light', 'Noto Serif SC', Georgia, 'Songti SC', 'STSong', serif;
+  --font-body:    'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-mono:    'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
   /* Type scale */
   --fs-eyebrow:  0.6875rem;
   --fs-body:     0.9375rem;
   --fs-lead:     1rem;
-  --fs-display:  clamp(3rem, 8vw, 5.5rem);
+  --fs-display:  clamp(2.25rem, 5vw, 3.5rem);
 
   /* Layout */
   --page-max:    880px;
@@ -75,7 +75,7 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   font-size: var(--fs-body);
-  line-height: 1.6;
+  line-height: 1.75;
   min-height: 100vh;
   font-weight: 400;
   transition: background-color 200ms ease, color 200ms ease;
@@ -84,21 +84,19 @@ body {
 /* ---------- Type — display / heading ---------- */
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text);
   margin: 0;
-  letter-spacing: -0.025em;
-  font-variation-settings: "opsz" 144;
+  letter-spacing: -0.005em;
 }
 
 .display {
   font-family: var(--font-display);
-  font-weight: 300;
+  font-weight: 400;
   font-size: var(--fs-display);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--text);
-  font-variation-settings: "opsz" 144;
 }
 .display em {
   font-style: italic;
@@ -132,7 +130,6 @@ a:focus-visible {
   font-size: var(--fs-lead);
   color: var(--text-soft);
   line-height: 1.55;
-  max-width: 28em;
 }
 .lead strong {
   color: var(--text);

@@ -1,14 +1,13 @@
 ---
-import type { Post } from '../data/posts';
+import type { PostSummary } from '../data/posts';
 
 interface Props {
-  post: Post;
+  post: PostSummary;
   href?: string;
 }
 
 const { post, href = '#' } = Astro.props;
-const date = new Date(post.date);
-const formatted = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+const formatted = `${post.date.getFullYear()}.${String(post.date.getMonth() + 1).padStart(2, '0')}.${String(post.date.getDate()).padStart(2, '0')}`;
 ---
 
 <a href={href} class="post-card">
@@ -59,7 +58,6 @@ const formatted = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
     color: var(--text-soft);
     line-height: 1.55;
     margin: 0;
-    max-width: 38em;
   }
   .post-card__arrow {
     position: absolute;

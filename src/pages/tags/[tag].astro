@@ -31,7 +31,7 @@ interface PageProps {
   tagCategory: CategorySlug;
 }
 const { tagSlug, tagLabel, tagCategory } = Astro.props as PageProps;
-const posts = postsSortedDesc(postsByTag(tagSlug));
+const posts = postsSortedDesc(await postsByTag(tagSlug));
 ---
 
 <BlogLayout

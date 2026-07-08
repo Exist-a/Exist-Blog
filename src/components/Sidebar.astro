@@ -1,12 +1,11 @@
 ---
 import {
   subcategories,
-  allPosts,
   getCategory,
   getSubcategory,
   type CategorySlug,
-  type SubcategorySlug,
 } from '../data/posts';
+import { getCollection } from 'astro:content';
 
 interface Props {
   /** 当前一级分类；不传则从 URL 推断 */
@@ -35,8 +34,7 @@ if (!detectedCategory) {
 if (!detectedActiveTag) {
   if (segments[0] === 'blog' && segments[2]) {
     // /blog/[cat]/[slug]/ —— 不强求匹配 subcategory.slug
-    const post = allPosts.find(p => p.slug === segments[2]);
-    if (post?.tags[0]) detectedActiveTag = post.tags[0];
+    detectedActiveTag = segments[2];
   } else if (segments[0] === 'tags' && segments[1]) {
     detectedActiveTag = segments[1];
   }
@@ -46,10 +44,13 @@ const category = detectedCategory;
 const activeTag = detectedActiveTag;
 
 // 每个 tag 对应的文章列表
+const allPosts = category ? await getCollection(
+  'posts',
+  p => p.data.category === category
+) : [];
+
 function postsOf(cat: CategorySlug, tag: string) {
-  return allPosts.filter(
-    p => p.category === cat && p.tags.includes(tag as SubcategorySlug)
-  );
+  return allPosts.filter(p => p.data.tags.includes(tag));
 }
 ---
 
@@ -76,17 +77,20 @@ function postsOf(cat: CategorySlug, tag: string) {
             </summary>
             {list.length > 0 && (
               <ul class="drawer__list">
-                {list.map(post => (
-                  <li>
-                    <a
-                      href={`/blog/${category}/${post.slug}/`}
-                      class:list={[
-                        'drawer__item',
-                        { 'is-active': segments[2] === post.slug }
-                      ]}
-                    >{post.title}</a>
-                  </li>
-                ))}
+                {list.map(post => {
+                  const slug = post.id.split('/').pop()!.replace(/\.md$/, '');
+                  return (
+                    <li>
+                      <a
+                        href={`/blog/${category}/${slug}/`}
+                        class:list={[
+                          'drawer__item',
+                          { 'is-active': segments[2] === slug }
+                        ]}
+                      >{post.data.title}</a>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </details>

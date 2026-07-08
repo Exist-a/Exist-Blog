@@ -1,147 +1,208 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/PageHeader.astro';
-
-const stack = [
-  { label: '前端',   items: ['React / Next.js (App Router)', 'TypeScript', 'CSS architecture'] },
-  { label: '后端',   items: ['Go (生产)', 'Node.js / tRPC', 'REST 设计'] },
-  { label: '数据库', items: ['PostgreSQL (主)', 'MySQL', 'Redis (缓存)'] },
-  { label: 'AI',     items: ['RAG 系统', 'Agent / function calling', 'Vector DB (pgvector)'] },
-];
-
-const now = [
-  '上海 / 远程，2026 暑期可入职',
-  '在做：把 Next.js + Go 的全栈项目 DecisionCourt 重写到 v2',
-  '在学：Agent 框架 / 长上下文工程',
-];
 ---
 
-<BaseLayout title="关于作者 · Exist" description="关于 Exist —— 前端转 AI 全栈，正在上海找工作。">
-  <PageHeader
-    eyebrow="about"
-    title="关于作者"
-    description="前端转 AI 全栈，沪漂找工作中。"
-  />
-
+<BaseLayout title="关于作者 · Exist" description="关于 Exist —— 个人学习笔记，记录学习心得。">
   <div class="about">
-    <img
-      src="/avatar.jpg"
-      alt="Exist 头像"
-      class="about__avatar"
-      width="140"
-      height="140"
+    <PageHeader
+      eyebrow="about"
+      title="关于作者"
     />
 
-    <p class="about__hello">
-      你好，我是 <strong>Exist</strong>。
-    </p>
+    <section class="about__intro">
+      <img
+        src="/avatar.jpg"
+        alt="Exist 头像"
+        class="about__avatar"
+        width="140"
+        height="140"
+        loading="lazy"
+      />
+      <div class="about__intro-text">
+        <p class="about__hello">我是 <strong>Exist</strong>，目前就读于<span class="hl">哈尔滨理工大学</span>。</p>
+        <p>这是我的个人学习笔记，记录着我的学习心得。</p>
+      </div>
+    </section>
 
-    <p>
-      写前端 4 年，最近一年在补后端 / 数据库 / AI。
-      做过 SaaS 后台、营销落地页、低代码平台，现在主要做 AI 全栈应用。
-    </p>
-
-    <p>
-      这个博客是我的<span class="hl">「公开学习日志」</span>——
-      每周写一篇最近学到的东西，主要踩坑向。
-      不保证都对，但保证都是我亲手试过的。
-    </p>
-
-    <h2 class="about__h2">现在在做什么</h2>
-    <ul class="about__list">
-      {now.map(item => <li>{item}</li>)}
-    </ul>
-
-    <h2 class="about__h2">技术栈</h2>
-    <div class="stack">
-      {stack.map(group => (
-        <div class="stack__group">
-          <div class="stack__label mono">{group.label}</div>
-          <ul class="stack__items">
-            {group.items.map(it => <li>{it}</li>)}
-          </ul>
+    <section class="about__section">
+      <h2 class="about__h2">目前的个人全栈项目</h2>
+      <a
+        href="https://decisioncourt.cn"
+        target="_blank"
+        rel="noopener"
+        class="project"
+      >
+        <div class="project__head">
+          <span class="project__name">决策庭</span>
+          <span class="project__url mono">decisioncourt.cn →</span>
         </div>
-      ))}
-    </div>
+        <p class="project__desc">
+          多 Agent 对抗辩论的 AI 决策辅助工具：围绕跳槽 / 创业 / 投资这类复杂决策，
+          让<strong>控方 / 辩方 / 调查员 / 书记员 / 法官</strong>五类专业 Agent 结构化对抗；
+          用户可<strong>实时提交证据</strong>供庭审质询，
+          最终由法官 Agent 输出一份可审计、可执行的《决策判决书》。
+        </p>
+        <p class="project__meta mono">
+          Next.js 14 · Go + Gin · PostgreSQL · DeepSeek / Kimi · v0.10.4
+        </p>
+      </a>
+    </section>
 
-    <h2 class="about__h2">联系我</h2>
-    <ul class="about__list">
-      <li>GitHub：<a href="https://github.com/Exist-a" target="_blank" rel="noopener">@Exist-a</a></li>
-      <li>邮箱：<a href="mailto:hi@example.com">hi@example.com</a>（占位）</li>
-    </ul>
+    <section class="about__section">
+      <h2 class="about__h2">联系我</h2>
+      <ul class="about__list about__list--contact">
+        <li>GitHub：<a href="https://github.com/Exist-a" target="_blank" rel="noopener">@Exist-a</a></li>
+        <li>邮箱：<a href="mailto:why.aexist@gmail.com">why.aexist@gmail.com</a></li>
+      </ul>
+    </section>
   </div>
 </BaseLayout>
 
 <style>
+  .about {
+    width: 100%;
+    padding: 2.5rem var(--page-pad-x);
+    max-width: none;
+  }
+
+  /* ── 顶部：头像 + 简介 左右两栏（窄屏塌成上下） ── */
+  .about__intro {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+    margin-bottom: 3rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--ink-line);
+  }
+
   .about__avatar {
     display: block;
     width: 140px;
     height: 140px;
     border-radius: 50%;
     object-fit: cover;
-    margin: 0 0 2rem 0;
-    box-shadow: 0 0 0 2px var(--avatar-ring), 0 8px 24px rgba(var(--shadow-color), 0.3);
+    box-shadow:
+      0 0 0 2px var(--avatar-ring),
+      0 8px 24px rgba(var(--shadow-color), 0.3);
   }
 
+  .about__intro-text { min-width: 0; }
+
   .about__hello {
-    font-size: 1.25rem;
-    margin-bottom: 1.25rem;
+    font-family: var(--font-body);
+    font-size: 1.375rem;
+    font-weight: 500;
+    color: var(--text);
+    margin: 0 0 1.25rem 0;
+    line-height: 1.4;
   }
   .about__hello strong {
     color: var(--accent);
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .about p {
     color: var(--text-soft);
-    line-height: 1.7;
-    margin-bottom: 1rem;
-    max-width: 38em;
+    line-height: 1.75;
+    margin: 0 0 1rem 0;
   }
-  .about .hl {
-    color: var(--accent);
+  .about p:last-child { margin-bottom: 0; }
+  .about .hl { color: var(--accent); }
+
+  /* ── 各小节 ── */
+  .about__section {
+    margin-bottom: 2.5rem;
   }
+  .about__section:last-child { margin-bottom: 0; }
 
   .about__h2 {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: 1.125rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1.0625rem;
     color: var(--text);
-    margin: 2.5rem 0 1rem 0;
-    letter-spacing: -0.01em;
+    margin: 0 0 1rem 0;
+    letter-spacing: -0.005em;
   }
 
   .about__list {
     list-style: none;
-    margin: 0 0 1rem 0;
-    padding: 0;
-    color: var(--text-soft);
-    line-height: 1.8;
-  }
-
-  .stack {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-  .stack__group {
-    border-left: 2px solid var(--accent);
-    padding-left: 1rem;
-  }
-  .stack__label {
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-  }
-  .stack__items {
-    list-style: none;
     margin: 0;
     padding: 0;
+    color: var(--text-soft);
+    line-height: 1.85;
+  }
+  .about__list li {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .about__list li:last-child { border-bottom: 0; }
+  .about__list--contact li { font-size: 0.9375rem; }
+  .about__list--contact a { color: var(--accent); }
+
+  /* ── 项目卡 ── */
+  .project {
+    display: block;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--ink-line);
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 160ms ease, transform 160ms ease;
+  }
+  .project:hover {
+    border-color: var(--accent);
+    transform: translateX(4px);
+  }
+  .project__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .project__name {
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .project:hover .project__name { color: var(--accent); }
+  .project__url {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-mute);
+  }
+  .project__desc {
+    margin: 0 0 0.75rem 0;
     font-size: 0.9375rem;
     color: var(--text-soft);
-    line-height: 1.7;
+    line-height: 1.75;
+  }
+  .project__desc strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .project__meta {
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--ink-line);
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    color: var(--text-mute);
+  }
+
+  /* ── 窄屏 ── */
+  @media (max-width: 640px) {
+    .about__intro {
+      grid-template-columns: 96px 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+    }
+    .about__avatar { width: 96px; height: 96px; }
+    .about__hello { font-size: 1.125rem; }
   }
 </style>
