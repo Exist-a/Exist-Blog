@@ -28,6 +28,12 @@ interface Props {
   activeTag?: string;
   /** 文章页传入的标题列表，渲染右侧目录 */
   headings?: Heading[];
+  /** 透传给 BaseLayout：og:type */
+  ogType?: 'website' | 'article';
+  /** 透传给 BaseLayout：文章发布时间 ISO 字符串 */
+  publishedTime?: string;
+  /** 透传给 BaseLayout：文章分类名 */
+  section?: string;
 }
 
 const {
@@ -40,6 +46,9 @@ const {
   category,
   activeTag,
   headings,
+  ogType,
+  publishedTime,
+  section,
 } = Astro.props;
 
 // 兜底：props 没传时从 URL 推断（兼容 /tags/[tag]/ 与裸路径访问）
@@ -62,7 +71,13 @@ const hasSidebar = !!layoutCat;
 const hasToc = !!headings && headings.some((h) => h.depth === 2);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout
+  title={title}
+  description={description}
+  ogType={ogType}
+  publishedTime={publishedTime}
+  section={section}
+>
   <div
     class:list={[
       'blog-layout',

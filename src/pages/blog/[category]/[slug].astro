@@ -36,6 +36,36 @@ const formatted = `${post.data.date.getFullYear()}.${String(post.data.date.getMo
 
 const { Content, headings } = await render(post);
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
+
+// 用于 JSON-LD 和 OG 的规范化字段
+const postUrl = new URL(
+  Astro.url.pathname.replace(/\/+$/, '') || '/',
+  Astro.site,
+).toString();
+const ogImageUrl = new URL(
+  BASE.replace(/\/$/, '') + '/avatar.jpg',
+  Astro.site,
+).toString();
+
+// BlogPosting 结构化数据：让搜索引擎识别这是一篇技术文章 + 元信息
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.excerpt,
+  datePublished: post.data.date.toISOString(),
+  dateModified: post.data.date.toISOString(),
+  author: { '@type': 'Person', name: 'Exist', url: Astro.site?.toString() },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Exist Blog',
+    logo: { '@type': 'ImageObject', url: ogImageUrl },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+  articleSection: cat.label,
+  keywords: post.data.tags.join(', '),
+  inLanguage: 'zh-Hans',
+};
 ---
 
 <BlogLayout
@@ -46,7 +76,12 @@ const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
   category={category}
   activeTag={post.data.tags[0]}
   headings={headings}
+  ogType="article"
+  publishedTime={post.data.date.toISOString()}
+  section={cat.label}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+
   <article class="post">
     <p class="post__excerpt lead">{post.data.excerpt}</p>
     <hr class="rule" />

@@ -1,8 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '');
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Exist Blog',
+    url: siteUrl,
+    inLanguage: 'zh-Hans',
+    description:
+      'Exist 的个人技术博客，记录前端、后端、数据库、AI 等方向的学习笔记。',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Exist',
+    url: siteUrl,
+  },
+];
 ---
 
 <BaseLayout>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+
   <section class="hero">
     <div class="hero__row">
       <div class="hero__avatar-frame" aria-hidden="false">
