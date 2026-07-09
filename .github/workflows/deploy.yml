@@ -48,3 +48,69 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  indexnow:
+    # 部署成功后自动把全站 URL 推给 IndexNow，覆盖 Bing / Yandex / Seznam 等
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      # 只需要 sitemap，不必全量打包；单独跑一次 build 把 dist 重新生成
+      - name: Build (sitemap only)
+        run: npm run build
+
+      - name: Parse sitemap and submit to IndexNow
+        env:
+          # IndexNow key 直接提交进仓库（key 不是 secret，只是身份标识）
+          INDEXNOW_KEY: '279daccd7218505a4bd4d351e781befa'
+          SITE_HOST: 'exist-a.github.io'
+          SITE_BASE: '/Exist-Blog'
+        run: |
+          set -euo pipefail
+
+          # 从构建产物里抽 <loc>...</loc>
+          mapfile -t URLS < <(grep -oE '<loc>[^<]+</loc>' dist/sitemap-0.xml \
+            | sed -E 's#</?loc>##g')
+
+          if [ "${#URLS[@]}" -eq 0 ]; then
+            echo "No sitemap URLs found, skip."
+            exit 0
+          fi
+
+          echo "Submitting ${#URLS[@]} URL(s) to IndexNow..."
+
+          # 用 jq 拼 urlList JSON 数组（ubuntu-latest 自带）
+          URL_LIST=$(printf '%s\n' "${URLS[@]}" | jq -R . | jq -s .)
+
+          KEY_LOC="https://${SITE_HOST}${SITE_BASE}/indexnow-key.txt"
+
+          # 单行 JSON，避免 heredoc 在 YAML 缩进里的坑
+          printf '%s' "{\"host\":\"${SITE_HOST}\",\"key\":\"${INDEXNOW_KEY}\",\"keyLocation\":\"${KEY_LOC}\",\"urlList\":${URL_LIST}}" > payload.json
+
+          echo "Payload:"
+          cat payload.json
+          echo
+
+          HTTP_CODE=$(curl -s -o response.txt -w "%{http_code}" \
+            -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data-binary @payload.json)
+
+          echo "IndexNow response: HTTP ${HTTP_CODE}"
+          cat response.txt || true
+
+          # 200/202 都视为成功，其他视为警告，不让 workflow 红
+          if [ "${HTTP_CODE}" != "200" ] && [ "${HTTP_CODE}" != "202" ]; then
+            echo "::warning::IndexNow returned ${HTTP_CODE}, site may already be indexed or key invalid"
+          fi
