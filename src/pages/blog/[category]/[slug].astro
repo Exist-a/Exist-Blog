@@ -34,7 +34,7 @@ const sub = post.data.tags[0] ? getSubcategory(post.data.tags[0]) : undefined;
 
 const formatted = `${post.data.date.getFullYear()}.${String(post.data.date.getMonth() + 1).padStart(2, '0')}.${String(post.data.date.getDate()).padStart(2, '0')}`;
 
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 ---
 
@@ -45,6 +45,7 @@ const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
   pageTitle={post.data.title}
   category={category}
   activeTag={post.data.tags[0]}
+  headings={headings}
 >
   <article class="post">
     <p class="post__excerpt lead">{post.data.excerpt}</p>
@@ -94,6 +95,8 @@ const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
     margin-top: 2.5rem !important;
     padding-top: 1.5rem;
     border-top: 1px solid var(--ink-line);
+    /* TOC 锚点跳转时给顶部 nav 留出空隙 */
+    scroll-margin-top: calc(var(--nav-h) + 1.5rem);
   }
   .post__content h2:first-child { border-top: 0; padding-top: 0; }
   .post__content h3 {

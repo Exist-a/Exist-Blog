@@ -2,11 +2,18 @@
 import BaseLayout from './BaseLayout.astro';
 import Sidebar from '../components/Sidebar.astro';
 import PageHeader from '../components/PageHeader.astro';
+import TableOfContents from '../components/TableOfContents.astro';
 import {
   getCategory,
   getSubcategory,
   type CategorySlug,
 } from '../data/posts';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
 
 interface Props {
   title?: string;
@@ -19,6 +26,8 @@ interface Props {
   category?: CategorySlug;
   /** 当前激活的二级 tag → 其抽屉自动展开 */
   activeTag?: string;
+  /** 文章页传入的标题列表，渲染右侧目录 */
+  headings?: Heading[];
 }
 
 const {
@@ -30,6 +39,7 @@ const {
   count,
   category,
   activeTag,
+  headings,
 } = Astro.props;
 
 // 兜底：props 没传时从 URL 推断（兼容 /tags/[tag]/ 与裸路径访问）
@@ -49,10 +59,16 @@ if (!layoutCat) {
   }
 }
 const hasSidebar = !!layoutCat;
+const hasToc = !!headings && headings.some((h) => h.depth === 2);
 ---
 
 <BaseLayout title={title} description={description}>
-  <div class:list={['blog-layout', { 'has-sidebar': hasSidebar }]}>
+  <div
+    class:list={[
+      'blog-layout',
+      { 'has-sidebar': hasSidebar, 'has-toc': hasToc },
+    ]}
+  >
     {hasSidebar && (
       <Sidebar category={layoutCat} activeTag={layoutActive} />
     )}
@@ -67,12 +83,14 @@ const hasSidebar = !!layoutCat;
       )}
       <slot />
     </div>
+    {hasToc && <TableOfContents headings={headings!} />}
   </div>
 </BaseLayout>
 
 <style>
   .blog-layout {
     display: grid;
+    /* 默认两列：左目录 + 主内容 */
     grid-template-columns: 240px minmax(0, 1fr);
     column-gap: 4rem;
     padding: 2.5rem var(--page-pad-x);
@@ -81,13 +99,27 @@ const hasSidebar = !!layoutCat;
   .blog-layout:not(.has-sidebar) {
     grid-template-columns: minmax(0, 1fr);
   }
+  /* 文章页：有 TOC 时升级为三列布局 */
+  .blog-layout.has-sidebar.has-toc {
+    grid-template-columns: 240px minmax(0, 1fr) 200px;
+  }
   .blog-layout__main {
     min-width: 0; /* 防止 grid 子项溢出 */
     width: 100%;
   }
 
+  @media (max-width: 1280px) {
+    /* 右侧 TOC 在窄屏隐藏，列数回到两列 */
+    .blog-layout.has-sidebar.has-toc {
+      grid-template-columns: 240px minmax(0, 1fr);
+    }
+  }
+
   @media (max-width: 768px) {
-    .blog-layout {
+    .blog-layout,
+    .blog-layout.has-sidebar,
+    .blog-layout.has-sidebar.has-toc,
+    .blog-layout:not(.has-sidebar) {
       grid-template-columns: 1fr;
       column-gap: 0;
       row-gap: 1rem;

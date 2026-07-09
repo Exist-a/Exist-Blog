@@ -1,0 +1,165 @@
+---
+/**
+ * 右侧文章目录：列出所有二级标题，点击平滑滚动到对应位置，
+ * 并把当前所在节对应的链接高亮。
+ *
+ * 依赖：
+ *   - 父布局把 headings（来自 render(post).headings）传进来
+ *   - 全局 CSS 已经给 html 加了 scroll-behavior: smooth
+ *   - .post__content h2 上加了 scroll-margin-top，避免被顶部 nav 遮住
+ */
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((h) => h.depth === 2);
+---
+
+{
+  items.length > 0 && (
+    <aside class="toc" aria-label="本页目录">
+      <p class="toc__title eyebrow">本页目录</p>
+      <nav>
+        <ol class="toc__list">
+          {items.map((h) => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                data-toc-slug={h.slug}
+                class="toc__link"
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </aside>
+  )
+}
+
+<script>
+  function initToc() {
+    const links = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>('[data-toc-slug]'),
+    );
+    if (links.length === 0) return;
+
+    const linkBySlug = new Map<string, HTMLAnchorElement>();
+    links.forEach((l) => {
+      const slug = l.dataset.tocSlug;
+      if (slug) linkBySlug.set(slug, l);
+    });
+
+    // 找到对应的标题 DOM；找不到就放弃（slug 与 ID 不一致时）
+    const targets: HTMLElement[] = [];
+    linkBySlug.forEach((_, slug) => {
+      const el = document.getElementById(slug);
+      if (el) targets.push(el);
+    });
+    if (targets.length === 0) return;
+
+    const setActive = (slug: string) => {
+      linkBySlug.forEach((link, s) => {
+        link.classList.toggle('is-active', s === slug);
+      });
+    };
+
+    // 监听每个 h2：进入"顶部 80px ~ 视口上方 30%"区间即视为当前节
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // 在所有"当前可见"的标题里取位置最靠上的那一个
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort(
+            (a, b) =>
+              a.target.getBoundingClientRect().top -
+              b.target.getBoundingClientRect().top,
+          );
+        if (visible.length > 0) {
+          setActive(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: '-80px 0px -70% 0px',
+        threshold: 0,
+      },
+    );
+    targets.forEach((t) => observer.observe(t));
+
+    // 用户点了 TOC 链接：拦截默认的"瞬移"行为，平滑滚动并更新 hash
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const slug = link.dataset.tocSlug;
+        if (!slug) return;
+        const target = document.getElementById(slug);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // 用 pushState 而不是 location.hash，避免触发额外的 jump
+        history.pushState(null, '', `#${slug}`);
+        setActive(slug);
+      });
+    });
+  }
+
+  initToc();
+  document.addEventListener('astro:page-load', initToc);
+</script>
+
+<style>
+  .toc {
+    position: sticky;
+    top: calc(var(--nav-h) + 1.5rem);
+    align-self: start;
+    max-height: calc(100vh - var(--nav-h) - 3rem);
+    overflow-y: auto;
+  }
+  .toc__title {
+    margin: 0 0 0.75rem 0;
+  }
+  .toc__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--ink-line);
+    display: flex;
+    flex-direction: column;
+  }
+  .toc__link {
+    display: block;
+    padding: 0.3rem 0 0.3rem 0.85rem;
+    margin-left: -1px;
+    color: var(--text-mute);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    border-left: 1px solid transparent;
+    transition:
+      color 120ms ease,
+      border-color 120ms ease,
+      padding-left 180ms ease;
+  }
+  .toc__link:hover {
+    color: var(--text);
+    padding-left: 1rem;
+  }
+  .toc__link.is-active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+
+  /* 窄屏隐藏右侧目录（左侧目录也会塌缩，整页只留主内容） */
+  @media (max-width: 1280px) {
+    .toc {
+      display: none;
+    }
+  }
+</style>

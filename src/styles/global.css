@@ -66,6 +66,8 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   background: var(--ink);
+  /* 文章页右侧 TOC 点击跳转时的平滑滚动 */
+  scroll-behavior: smooth;
   /* 主题切换时的过渡 */
   transition: background-color 200ms ease, color 200ms ease;
 }
