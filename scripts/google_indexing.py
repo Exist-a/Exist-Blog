@@ -5,7 +5,9 @@ submit_urls.py — 读取 dist/sitemap-0.xml，逐个调用 Google Indexing API 
 设计要点：
 - 不做 batch，每 URL 单独 publish，每天 200 的配额个人博客远够用
 - 单 URL 失败不影响其它 URL，最后统计成功 / 失败数
-- 从环境变量读 JSON 凭证（GitHub Actions 走 secrets.GOOGLE_CREDENTIALS_JSON）
+- 从 3 个拆开的 env 字段（GOOGLE_PROJECT_ID / GOOGLE_CLIENT_EMAIL /
+  GOOGLE_PRIVATE_KEY）拼出 service_account blob，避 GitHub Secrets 粘整段
+  JSON 不便，以及一些浏览器对多行 PRIVATE_KEY 丢换行的坑
 """
 
 import json
@@ -56,6 +58,18 @@ def main() -> int:
         "GOOGLE_CLIENT_EMAIL",
         "GOOGLE_PRIVATE_KEY",
     ]
+
+    # 调试用：打印 env 状态（不含真实内容，只含长度/换行数），
+    # key 不打任何字符，避免意外进公开仓库的日志。
+    print("[env] ----- credential env state -----")
+    for k in ["GOOGLE_PROJECT_ID", "GOOGLE_CLIENT_EMAIL", "GOOGLE_PRIVATE_KEY"]:
+        v = os.environ.get(k)
+        if not v:
+            print(f"[env] {k} = EMPTY")
+        else:
+            print(f"[env] {k} set, len={len(v)}, newlines={v.count(chr(10))}")
+    print("[env] ---------------------------------")
+
     missing = [k for k in required if not os.environ.get(k)]
     if missing:
         print(f"ERROR: missing env var(s): {', '.join(missing)}", file=sys.stderr)
@@ -77,9 +91,14 @@ def main() -> int:
         "client_email": os.environ["GOOGLE_CLIENT_EMAIL"],
         "client_id": os.environ.get("GOOGLE_CLIENT_ID", ""),
     }
-    credentials = service_account.Credentials.from_service_account_info(
-        creds_dict, scopes=SCOPES
-    )
+    try:
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_dict, scopes=SCOPES
+        )
+    except Exception as e:
+        print(f"ERROR building credentials: {type(e).__name__}: {e}",
+              file=sys.stderr)
+        return 1
     service = build("indexing", "v3", credentials=credentials, cache_discovery=False)
 
     ok = 0

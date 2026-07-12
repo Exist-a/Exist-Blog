@@ -48,4 +48,8 @@ jobs:
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
           GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
           GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
-        run: python scripts/google_indexing.py
+        run: |
+          # `set -x` 让 bash 打印每条执行的命令，便于在日志里看出
+          # python 是否启动 / import 卡死 / 哪一行报错。
+          set -x
+          python scripts/google_indexing.py 2>&1 || echo "EXIT_CODE=$?"
