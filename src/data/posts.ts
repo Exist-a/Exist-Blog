@@ -50,7 +50,10 @@ export const subcategories = {
     { slug: 'postgres', label: 'PostgreSQL' },
     { slug: 'mysql',    label: 'MySQL'      },
   ],
-  ai: [],
+  ai: [
+    { slug: 'rag',   label: 'RAG'    },
+    { slug: 'agent', label: 'Agent' },
+  ],
 } as const;
 
 export type SubcategorySlug =
