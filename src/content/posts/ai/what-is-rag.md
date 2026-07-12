@@ -1,6 +1,6 @@
 ---
 title: RAG 是什么？
-date: 2026-07-10
+date: 2026-07-12
 excerpt: RAG（Retrieval Augmented Generation，检索增强生成）——把外部知识按需检索后拼进大模型上下文，让模型不再只依赖训练数据。
 category: ai
 tags: [rag, llm]
