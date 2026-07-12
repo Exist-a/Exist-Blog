@@ -9,6 +9,14 @@ node_modules/
 # docs (local only)
 docs/
 
+# local AI agent conventions (not shared)
+AGENTS.md
+
+# Google service account credential (DOWNLOADED LOCALLY, NEVER commit)
+exist-blog-*.json
+*-credentials.json
+sa-key.json
+
 # logs
 npm-debug.log*
 yarn-debug.log*
