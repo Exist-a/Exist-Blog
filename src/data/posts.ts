@@ -36,10 +36,11 @@ export type CategorySlug = typeof categories[number]['slug'];
 
 export const subcategories = {
   frontend: [
-    { slug: 'react',  label: 'React'   },
-    { slug: 'html',   label: 'HTML'    },
-    { slug: 'css',    label: 'CSS'     },
-    { slug: 'nextjs', label: 'Next.js' },
+    { slug: 'react',      label: 'React'     },
+    { slug: 'html',       label: 'HTML'      },
+    { slug: 'css',        label: 'CSS'       },
+    { slug: 'javascript', label: 'JavaScript'},
+    { slug: 'nextjs',     label: 'Next.js'   },
   ],
   backend: [
     { slug: 'go',      label: 'Go'             },
