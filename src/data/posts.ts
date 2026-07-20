@@ -37,6 +37,7 @@ export type CategorySlug = typeof categories[number]['slug'];
 export const subcategories = {
   frontend: [
     { slug: 'react',      label: 'React'     },
+    { slug: 'vue',        label: 'Vue'       },
     { slug: 'html',       label: 'HTML'      },
     { slug: 'css',        label: 'CSS'       },
     { slug: 'javascript', label: 'JavaScript'},
