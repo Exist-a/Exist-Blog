@@ -13,7 +13,8 @@ export async function getStaticPaths() {
   const posts = await getCollection('posts');
   return categories.flatMap(cat =>
     posts
-      .filter(p => p.data.category === cat.slug)
+      // 过滤掉 draft 文章：不构建静态页、不进 sitemap
+      .filter(p => !p.data.draft && p.data.category === cat.slug)
       .map(post => ({
         params: {
           category: cat.slug,
@@ -38,14 +39,20 @@ const { Content, headings } = await render(post);
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 
 // 用于 JSON-LD 和 OG 的规范化字段
-const postUrl = new URL(
-  Astro.url.pathname.replace(/\/+$/, '') || '/',
-  Astro.site,
-).toString();
+// 注意：trailingSlash=always 已经保证 Astro.url.pathname 自带尾斜杠，
+// 不再 .replace(/\/+$/, '') —— 那样反而和 sitemap / GitHub Pages 不一致。
+const postUrl = new URL(Astro.url.pathname, Astro.site).toString();
+
+// OG image / JSON-LD image：优先用 frontmatter.cover，没设则 fallback 到 avatar.jpg
+const coverRelative = post.data.cover ?? 'avatar.jpg';
 const ogImageUrl = new URL(
-  BASE.replace(/\/$/, '') + '/avatar.jpg',
+  BASE.replace(/\/$/, '') + '/' + coverRelative.replace(/^\//, ''),
   Astro.site,
 ).toString();
+
+// dateModified：有 updated 字段就用 updated，否则 fallback 到 datePublished
+const datePublishedISO = post.data.date.toISOString();
+const dateModifiedISO = (post.data.updated ?? post.data.date).toISOString();
 
 // BlogPosting 结构化数据：让搜索引擎识别这是一篇技术文章 + 元信息
 const jsonLd = {
@@ -53,14 +60,15 @@ const jsonLd = {
   '@type': 'BlogPosting',
   headline: post.data.title,
   description: post.data.excerpt,
-  datePublished: post.data.date.toISOString(),
-  dateModified: post.data.date.toISOString(),
+  datePublished: datePublishedISO,
+  dateModified: dateModifiedISO,
   author: { '@type': 'Person', name: 'Exist', url: Astro.site?.toString() },
   publisher: {
     '@type': 'Organization',
     name: 'Exist Blog',
     logo: { '@type': 'ImageObject', url: ogImageUrl },
   },
+  image: ogImageUrl,
   mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
   articleSection: cat.label,
   keywords: post.data.tags.join(', '),
@@ -77,8 +85,11 @@ const jsonLd = {
   activeTag={post.data.tags[0]}
   headings={headings}
   ogType="article"
-  publishedTime={post.data.date.toISOString()}
+  publishedTime={datePublishedISO}
+  modifiedTime={dateModifiedISO}
   section={cat.label}
+  tags={post.data.tags}
+  ogImage={coverRelative}
 >
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
 

@@ -16,10 +16,16 @@ interface Props {
   ogType?: 'website' | 'article';
   /** 文章发布时间 ISO 字符串（ogType=article 时使用） */
   publishedTime?: string;
+  /** 文章更新时间 ISO 字符串（ogType=article 时使用），不传 fallback 到 publishedTime */
+  modifiedTime?: string;
   /** 文章分类（如 "前端 / 后端 / 数据库"），仅 article */
   section?: string;
+  /** 文章 tags，用于 og:article:tag（每个 tag 一个 meta） */
+  tags?: string[];
   /** 自定义 og:image 路径（相对 base path），不传用默认头像 */
   ogImage?: string;
+  /** 百度站长平台验证 token；存在则渲染 <meta name="baidu-site-verification"> */
+  baiduSiteVerification?: string;
 }
 
 const {
@@ -27,14 +33,18 @@ const {
   description = DEFAULT_DESCRIPTION,
   ogType = 'website',
   publishedTime,
+  modifiedTime,
   section,
+  tags = [],
   ogImage,
+  baiduSiteVerification,
 } = Astro.props;
 
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/');
 
-// 规范化 URL：去掉末尾斜杠、拼到 site 上
-const canonical = new URL(Astro.url.pathname.replace(/\/+$/, '') || '/', Astro.site).toString();
+// Canonical：与 sitemap / GitHub Pages 的 trailingSlash=always 保持一致（都带尾斜杠）。
+// 旧版会 .replace(/\/+$/, '') 把尾斜杠去掉，跟 sitemap 不一致 → Google 把信号都打折。
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 
 // og:image 必须是绝对 URL。传入值允许是绝对 URL 或相对 base 的路径
 const ogImageAbs = ogImage
@@ -42,20 +52,44 @@ const ogImageAbs = ogImage
       ? ogImage
       : new URL(BASE.replace(/\/$/, '') + '/' + ogImage.replace(/^\//, ''), Astro.site).toString())
   : new URL(BASE.replace(/\/$/, '') + '/' + DEFAULT_OG_IMAGE, Astro.site).toString();
+
+// RSS feed 绝对 URL（无论 base 是子路径还是根都有用）
+const rssUrl = new URL(BASE + 'rss.xml', Astro.site).toString();
 ---
 
 <!DOCTYPE html>
 <html lang="zh-Hans">
   <head>
     <meta charset="utf-8" />
-    <!-- 网站图标：直接用 /avatar.jpg -->
-    <link rel="icon" href={`${BASE}avatar.jpg`} type="image/jpeg" />
+    <!--
+      网站图标：优先用 SVG，浏览器不支持时回退到 ICO。
+      旧版写死成 avatar.jpg 是个 bug —— 现在改回 public/ 里真正的 favicon。
+    -->
+    <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    <link rel="alternate icon" type="image/x-icon" href={`${BASE}favicon.ico`} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
 
+    <!-- RSS feed：让 RSS 采集站、订阅器能自动发现 -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE_NAME}
+      href={rssUrl}
+    />
+
     <!-- Canonical：避免被识别为重复内容 -->
     <link rel="canonical" href={canonical} />
+
+    <!-- 百度站长平台验证（可选，由调用方传 token） -->
+    {baiduSiteVerification && (
+      <meta name="baidu-site-verification" content={baiduSiteVerification} />
+    )}
+
+    <!-- 移动浏览器 UI 配色：让顶部状态栏跟随主题色 -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
 
     <!-- Open Graph -->
     <meta property="og:site_name" content={SITE_NAME} />
@@ -65,8 +99,14 @@ const ogImageAbs = ogImage
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
     {ogType === 'article' && publishedTime && (
       <meta property="article:published_time" content={publishedTime} />
+    )}
+    {ogType === 'article' && (modifiedTime ?? publishedTime) && (
+      <meta property="article:modified_time" content={modifiedTime ?? publishedTime} />
     )}
     {ogType === 'article' && section && (
       <meta property="article:section" content={section} />
@@ -74,6 +114,9 @@ const ogImageAbs = ogImage
     {ogType === 'article' && (
       <meta property="article:author" content={AUTHOR} />
     )}
+    {ogType === 'article' && tags.map((tag) => (
+      <meta property="article:tag" content={tag} />
+    ))}
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />

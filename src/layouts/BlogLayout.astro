@@ -32,8 +32,14 @@ interface Props {
   ogType?: 'website' | 'article';
   /** 透传给 BaseLayout：文章发布时间 ISO 字符串 */
   publishedTime?: string;
+  /** 透传给 BaseLayout：文章更新时间 ISO 字符串 */
+  modifiedTime?: string;
   /** 透传给 BaseLayout：文章分类名 */
   section?: string;
+  /** 透传给 BaseLayout：文章 tags，每个渲染成 og:article:tag */
+  tags?: string[];
+  /** 透传给 BaseLayout：百度站长平台验证 token */
+  baiduSiteVerification?: string;
 }
 
 const {
@@ -48,7 +54,10 @@ const {
   headings,
   ogType,
   publishedTime,
+  modifiedTime,
   section,
+  tags,
+  baiduSiteVerification,
 } = Astro.props;
 
 // 兜底：props 没传时从 URL 推断（兼容 /tags/[tag]/ 与裸路径访问）
@@ -76,7 +85,10 @@ const hasToc = !!headings && headings.some((h) => h.depth === 2);
   description={description}
   ogType={ogType}
   publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
   section={section}
+  tags={tags}
+  baiduSiteVerification={baiduSiteVerification}
 >
   <div
     class:list={[

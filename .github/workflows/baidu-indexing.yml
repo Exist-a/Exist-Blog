@@ -1,0 +1,52 @@
+name: Baidu Indexing
+
+# 监听 Deploy to GitHub Pages 完成后跑，把 dist/sitemap-0.xml 里所有 URL
+# 通过百度搜索资源平台"普通收录"API 推给百度。
+#
+# 配额：百度推送配额 ≈ 10 万条/天，够个人博客。
+# 与 google-indexing.yml 平行运行，互不阻塞。
+
+on:
+  workflow_run:
+    workflows: ["Deploy to GitHub Pages"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baidu-indexing
+  cancel-in-progress: false
+
+jobs:
+  push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deploy commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install deps & build
+        run: npm install --no-audit --no-fund && npm run build
+
+      - name: Push URLs to Baidu
+        env:
+          BAIDU_SITE: 'https://exist-a.github.io/Exist-Blog'
+          BAIDU_TOKEN: ${{ secrets.BAIDU_PUSH_TOKEN }}
+        run: |
+          set -x
+          python scripts/baidu_push.py 2>&1 || echo "EXIT_CODE=$?"
