@@ -47,6 +47,7 @@ export const subcategories = {
     { slug: 'go',      label: 'Go'             },
     { slug: 'api',     label: 'API 设计'        },
     { slug: 'pg-perf', label: 'Postgres 性能'   },
+    { slug: 'python',  label: 'Python'          },
   ],
   database: [
     { slug: 'postgres', label: 'PostgreSQL' },
